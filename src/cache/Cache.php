@@ -2,6 +2,8 @@
 
 namespace Cache;
 
+// TODO singleton
+
 /**
  * Cache class
  *
@@ -31,7 +33,18 @@ class Cache
         $config = include "config.php";
 
         $this->memcacheObj = new \Memcache();
-        $this->memcacheObj->connect($config['host'], $config['port']) or die('Memcache not connect');
+        $this->memcacheObj->connect($config['host'], $config['port']) or die('Memcache is not connected');
+    }
+
+    /**
+     * Generate key for input string
+     *
+     * @param string $string - indentifier
+     * @return string - hashed id
+     */
+    private function generateKey($string)
+    {
+        return md5($string);
     }
 
     /**
@@ -42,6 +55,8 @@ class Cache
      */
     public function get($key)
     {
+        $key = $this->generateKey($key);
+
         $cacheObj = $this->memcacheObj->get($key);
 
         if(!empty($cacheObj)) {
@@ -50,7 +65,6 @@ class Cache
 
         return null;
     }
-
 
     /**
      * Set object
@@ -61,6 +75,8 @@ class Cache
      */
     public function set($key, $obj, $timeOfLife = 60 * 60)
     {
+        $key = $this->generateKey($key);
+
         $this->memcacheObj->set($key, $obj, MEMCACHE_COMPRESSED, $timeOfLife);
     }
 
@@ -71,6 +87,8 @@ class Cache
      */
     public function delete($key)
     {
+        $key = $this->generateKey($key);
+
         $this->memcacheObj->delete($key);
     }
 }
